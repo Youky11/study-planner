@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#334155">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="学习计划台">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<title>学习计划台</title>
+<style>
+:root {
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #2563eb;
+  --sidebar-bg: #334155;
+  --sidebar-active: #1e293b;
+  --bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --text-lighter: #94a3b8;
+  --border: #e2e8f0;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --info: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+}
+
+/* ===== 左侧导航栏 ===== */
+.sidebar {
+  width: 180px;
+  min-width: 180px;
+  background: var(--sidebar-bg);
+  color: #cbd5e1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+.sidebar-date {
+  font-size: 11px;
+  color: var(--text-lighter);
+  margin-top: 4px;
+}
+.sidebar-week {
+  display: inline-block;
+  background: rgba(59,130,246,0.3);
+  color: #93c5fd;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.nav-list {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  font-size: 14px;
+}
+.nav-item:active { background: rgba(255,255,255,0.05); }
+.nav-item.active {
+  background: var(--sidebar-active);
+  border-left-color: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.nav-item .nav-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 10px;
+  color: var(--text-lighter);
+  text-align: center;
+}
+
+/* ===== 主内容区 ===== */
+.main {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 40px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 页面标题 */
+.page-header {
+  margin-bottom: 16px;
+}
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.page-sub {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+/* 面板 */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* 卡片 */
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text);
+}
+
+/* 输入区 */
+.input-group { margin-bottom: 12px; }
+.input-label {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+textarea, input[type="text"], input[type="number"] {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+  background: #f8fafc;
+}
+textarea:focus, input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+}
+textarea { min-height: 70px; }
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:active { background: var(--primary-dark); }
+.btn-outline { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn-outline:active { background: var(--primary); color: white; }
+.btn-danger { background: white; color: var(--danger); border: 1.5px solid var(--danger); }
+.btn-block { width: 100%; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+
+/* Todo List */
+.todo-list { margin-bottom: 4px; }
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: all 0.15s;
+}
+.todo-item.done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--text-lighter);
+}
+.todo-checkbox {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  background: white;
+}
+.todo-checkbox.checked {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+.todo-checkbox.checked::after {
+  content: '✓';
+  font-size: 14px;
+  font-weight: 700;
+}
+.todo-text {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+.todo-delete {
+  background: none;
+  border: none;
+  color: var(--text-lighter);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  opacity: 0.4;
+}
+.todo-delete:active { opacity: 1; color: var(--danger); }
+
+.todo-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.todo-add-row input {
+  flex: 1;
+  background: white;
+}
+.voice-btn-inline {
+  background: #eff6ff;
+  border: 1.5px solid var(--primary-light);
+  color: var(--primary);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 18px;
+  cursor: pointer;
+  min-width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.voice-btn-inline.recording {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.todo-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-light);
+}
+.todo-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.todo-progress-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* 日计划日期导航 */
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+.date-nav button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 4px 12px;
+}
+.date-nav .current-date { font-size: 15px; font-weight: 600; text-align: center; }
+.date-nav .today-badge {
+  font-size: 10px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* 日计划区块 */
+.plan-section { margin-bottom: 16px; }
+.plan-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plan-section-label::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* 周复盘表格 */
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.review-table th, .review-table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+}
+.review-table th {
+  background: var(--sidebar-bg);
+  color: white;
+  font-weight: 500;
+}
+.review-table tr:nth-child(even) { background: #f8fafc; }
+.review-table .status-done { color: var(--success); font-weight: 600; }
+.review-table .status-partial { color: var(--warning); font-weight: 600; }
+.review-table .status-miss { color: var(--danger); font-weight: 600; }
+
+/* 英语模块 */
+.word-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.word-goal input { width: 80px; text-align: center; }
+.word-progress {
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.word-progress-bar {
+  height: 8px;
+  background: #dbeafe;
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.word-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+/* 政治时政卡片 */
+.news-card {
+  background: linear-gradient(135deg, #eff6ff, #fff);
+  border-left: 4px solid var(--primary);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.news-card .news-date { font-size: 11px; color: var(--text-lighter); }
+.news-card .news-title { font-size: 14px; font-weight: 600; margin: 4px 0; color: var(--primary-dark); }
+.news-card .news-content { font-size: 13px; line-height: 1.7; color: #475569; }
+.news-card .news-tag {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 6px;
+}
+
+/* 专业课大纲 */
+.outline-item { margin-bottom: 4px; }
+.outline-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid var(--border);
+}
+.outline-header:active { background: #e2e8f0; }
+.outline-toggle {
+  font-size: 14px;
+  color: var(--text-lighter);
+  width: 20px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+.outline-toggle.expanded { transform: rotate(90deg); }
+.outline-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+.outline-label.course { font-weight: 600; color: var(--primary-dark); font-size: 15px; }
+.outline-label.chapter { color: var(--text); }
+.outline-actions { display: flex; gap: 4px; }
+.outline-actions button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 2px 6px;
+  cursor: pointer;
+  opacity: 0.5;
+}
+.outline-actions button:active { opacity: 1; }
+.outline-children {
+  margin-left: 16px;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+  margin-top: 4px;
+  display: none;
+}
+.outline-children.show { display: block; }
+
+/* 章节批注区 */
+.chapter-notes {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0 8px 28px;
+  border: 1px solid var(--border);
+}
+.note-row { margin-bottom: 10px; }
+.note-row:last-child { margin-bottom: 0; }
+.note-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.note-label.progress { color: var(--primary); }
+.note-label.keypoints { color: var(--warning); }
+.note-label.weakness { color: var(--danger); }
+
+/* 添加表单 */
+.add-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+}
+.add-form input { flex: 1; }
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-lighter);
+}
+.empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30,41,59,0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* 保存提示 */
+.save-indicator {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background: var(--success);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.save-indicator.show { opacity: 1; }
+
+/* 历史日期列表 */
+.history-list { margin-top: 12px; }
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+.history-item:active { background: #e2e8f0; }
+.history-date { font-size: 14px; font-weight: 500; }
+.history-status { font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+.history-status.has-data { background: #dbeafe; color: var(--primary-dark); }
+.history-status.no-data { background: #f1f5f9; color: var(--text-lighter); }
+
+/* 月计划日历 */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+.month-nav button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 4px 12px;
+}
+.month-nav .current-month { font-size: 16px; font-weight: 600; }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  padding: 6px 0;
+}
+.calendar-day {
+  aspect-ratio: 1;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.calendar-day:active { background: #e2e8f0; }
+.calendar-day.today { border-color: var(--primary); background: #eff6ff; }
+.calendar-day.today .day-num { color: var(--primary); font-weight: 700; }
+.calendar-day.empty { background: transparent; border-color: transparent; cursor: default; }
+.calendar-day .day-num { font-size: 13px; color: var(--text); }
+.calendar-day .day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 3px;
+}
+.calendar-day .day-dot.done { background: var(--success); }
+.calendar-day .day-dot.partial { background: var(--warning); }
+.calendar-day .day-dot.miss { background: var(--danger); }
+
+.month-goal-card {
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.month-goal-card .goal-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.month-stat-item {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.month-stat-item .num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.month-stat-item .label {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.subject-goal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.subject-goal-item:last-child { border-bottom: none; }
+.subject-goal-item input { flex: 1; }
+.subject-goal-item .pct {
+  font-size: 12px;
+  color: var(--text-light);
+  min-width: 45px;
+  text-align: right;
+}
+
+/* 复习轮次切换 */
+.round-btn {
+  flex: 1;
+  padding: 10px 4px;
+  border: none;
+  background: white;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.round-btn.active {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* 单词卡片 */
+.word-card {
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+.word-card .w-word { font-size: 24px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
+.word-card .w-phonetic { font-size: 13px; color: var(--text-light); margin-bottom: 8px; }
+.word-card .w-meaning { font-size: 15px; color: var(--text); margin-bottom: 8px; }
+.word-card .w-example { font-size: 13px; color: var(--text-light); font-style: italic; line-height: 1.6; background: white; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+/* 知识点卡片 */
+.point-card {
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 16px;
+}
+.point-card .p-chapter { font-size: 11px; color: #b45309; background: #fef3c7; display: inline-block; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; }
+.point-card .p-title { font-size: 15px; font-weight: 700; color: #78350f; margin-bottom: 6px; }
+.point-card .p-content { font-size: 13px; line-height: 1.8; color: #57534e; }
+
+/* 移动端折叠侧边栏 */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  background: var(--sidebar-bg);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 90;
+}
+.overlay.show { display: block; }
+
+@media (max-width: 600px) {
+  .menu-toggle { display: flex; }
+  .sidebar {
+    position: fixed;
+    left: -200px;
+    transition: left 0.3s;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+  }
+  .sidebar.open { left: 0; }
+  .main { padding: 60px 12px 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 移动端菜单按钮 -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- 左侧导航栏 -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">学习计划台</div>
+    <div class="sidebar-date" id="sidebarDate"></div>
+    <div class="sidebar-week" id="sidebarWeek"></div>
+  </div>
+  <div class="nav-list">
+    <div class="nav-item active" data-tab="plan" onclick="switchTab('plan')">
+      <span class="nav-icon">📝</span> 日计划
+    </div>
+    <div class="nav-item" data-tab="english" onclick="switchTab('english')">
+      <span class="nav-icon">🔤</span> 英语
+    </div>
+    <div class="nav-item" data-tab="politics" onclick="switchTab('politics')">
+      <span class="nav-icon">📰</span> 政治
+    </div>
+    <div class="nav-item" data-tab="major" onclick="switchTab('major')">
+      <span class="nav-icon">📚</span> 专业课
+    </div>
+    <div class="nav-item" data-tab="review" onclick="switchTab('review')">
+      <span class="nav-icon">📊</span> 周复盘
+    </div>
+    <div class="nav-item" data-tab="monthly" onclick="switchTab('monthly')">
+      <span class="nav-icon">📅</span> 月计划
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div style="margin-bottom:8px;">
+      <button class="btn btn-sm btn-outline" style="width:100%;color:#93c5fd;border-color:#3b82f6;background:rgba(59,130,246,0.15);" onclick="cloudSync()">☁️ 云同步</button>
+    </div>
+    <div id="syncStatus" style="font-size:10px;color:#64748b;">点击同步到云端</div>
+    <div style="margin-top:4px;">学习计划台 v1.1</div>
+  </div>
+</div>
+
+<!-- 主内容区 -->
+<div class="main">
+
+<!-- ===== 日计划 ===== -->
+<div class="panel active" id="panel-plan">
+  <div class="page-header">
+    <div class="page-title">日计划</div>
+    <div class="page-sub">每天的目标、完成情况和复盘</div>
+  </div>
+
+  <div class="date-nav">
+    <button onclick="changeDate(-1)">‹</button>
+    <div class="current-date">
+      <div id="currentDateDisplay"></div>
+      <div class="today-badge" id="todayIndicator"></div>
+    </div>
+    <button onclick="changeDate(1)">›</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📝 今日计划</span>
+      <button class="btn btn-sm btn-outline" onclick="scrollToToday()">回到今天</button>
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-label">🎯 今日目标</div>
+      <div class="todo-progress">
+        <span id="goalProgressText">0/0</span>
+        <div class="todo-progress-bar"><div class="todo-progress-fill" id="goalProgressBar" style="width:0%"></div></div>
+        <span id="goalProgressPct">0%</span>
+      </div>
+      <div class="todo-list" id="goalTodoList"></div>
+      <div class="todo-add-row">
+        <input type="text" id="goalTodoInput" placeholder="输入任务后回车添加，或点麦克风语音输入" onkeydown="if(event.key==='Enter'){addGoalTodo();}">
+        <button class="voice-btn-inline" id="goalVoiceBtn" onclick="startVoiceInput('goal')" title="语音输入">🎤</button>
+        <button class="btn btn-sm btn-primary" onclick="addGoalTodo()">＋</button>
+      </div>
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-label">🔍 复盘（未完成原因分析）</div>
+      <textarea id="planReview" placeholder="哪些没完成？为什么？明天怎么改进？" oninput="saveCurrentPlan()"></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>📅 历史记录</span></div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<!-- ===== 英语 ===== -->
+<div class="panel" id="panel-english">
+  <div class="page-header">
+    <div class="page-title">英语</div>
+    <div class="page-sub">每日高频词与背单词进度</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📖 今日高频词</span>
+      <button class="btn btn-sm btn-outline" onclick="nextWord()">换一个</button>
+    </div>
+    <div id="wordCard"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>🔤 背单词进度</span></div>
+    <div class="word-goal">
+      <div>
+        <div class="input-label">今日目标（个）</div>
+        <input type="number" id="wordGoal" min="50" max="500" step="50" value="200" onchange="saveEnglishData()">
+      </div>
+      <div style="flex:1;">
+        <div class="input-label">已背（个）</div>
+        <input type="number" id="wordDone" min="0" value="0" onchange="saveEnglishData()">
+      </div>
+    </div>
+    <div class="word-progress">
+      <div style="display:flex;justify-content:space-between;font-size:13px;">
+        <span>今日进度</span>
+        <span id="wordPercent">0%</span>
+      </div>
+      <div class="word-progress-bar">
+        <div class="word-progress-fill" id="wordBar" style="width:0%"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="jumpToMomo()">
+      📱 打开墨墨背单词
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>📊 本周单词统计</span></div>
+    <div id="wordStats" style="font-size:13px;"></div>
+  </div>
+</div>
+
+<!-- ===== 政治 ===== -->
+<div class="panel" id="panel-politics">
+  <div class="page-header">
+    <div class="page-title">政治</div>
+    <div class="page-sub">每日时政与知识点</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📰 今日时政</span>
+      <button class="btn btn-sm btn-outline" onclick="nextNews()">换一条</button>
+    </div>
+    <div id="newsContainer"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>🎓 每日知识点</span>
+      <button class="btn btn-sm btn-outline" onclick="nextPoint()">换一个</button>
+    </div>
+    <div id="pointContainer"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>📌 政治学习笔记</span></div>
+    <textarea id="politicsNote" placeholder="记录政治学习要点..." oninput="savePoliticsData()" style="min-height:100px;"></textarea>
+  </div>
+</div>
+
+<!-- ===== 专业课 ===== -->
+<div class="panel" id="panel-major">
+  <div class="page-header">
+    <div class="page-title">专业课</div>
+    <div class="page-sub">分轮复习管理</div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1.5px solid var(--primary);">
+      <button class="round-btn active" data-round="1" onclick="switchRound(1)">一轮·基础</button>
+      <button class="round-btn" data-round="2" onclick="switchRound(2)">二轮·背诵</button>
+      <button class="round-btn" data-round="3" onclick="switchRound(3)">三轮·冲刺</button>
+    </div>
+
+    <div id="round1Panel">
+      <div class="card-title">
+        <span>📚 专业课大纲</span>
+        <button class="btn btn-sm btn-outline" onclick="showAddCourseForm()">+ 添加课程</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">
+        点击展开/折叠 · 每章可批注进度/考点/薄弱点
+      </div>
+      <div id="addCourseForm" class="add-form" style="display:none;">
+        <input type="text" id="newCourseName" placeholder="输入课程名">
+        <button class="btn btn-sm btn-primary" onclick="addCourse()">添加</button>
+        <button class="btn btn-sm btn-outline" onclick="hideAddCourseForm()">取消</button>
+      </div>
+      <div id="outlineContainer"></div>
+    </div>
+
+    <div id="round2Panel" style="display:none;">
+      <div class="card-title">
+        <span>📖 二轮背诵打卡</span>
+        <button class="btn btn-sm btn-outline" onclick="showAddCourseForm2()">+ 添加课程</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">
+        每章设定背诵天数，每天打卡，追踪背诵进度
+      </div>
+      <div id="addCourseForm2" class="add-form" style="display:none;">
+        <input type="text" id="newCourseName2" placeholder="输入课程名">
+        <button class="btn btn-sm btn-primary" onclick="addCourse2()">添加</button>
+        <button class="btn btn-sm btn-outline" onclick="document.getElementById('addCourseForm2').style.display='none';">取消</button>
+      </div>
+      <div id="reciteContainer"></div>
+    </div>
+
+    <div id="round3Panel" style="display:none;">
+      <div class="empty-state" style="padding:40px 20px;">
+        <div class="icon">🚀</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">三轮冲刺</div>
+        <div style="font-size:13px;">二轮背诵完成后开启，敬请期待</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 周复盘 ===== -->
+<div class="panel" id="panel-review">
+  <div class="page-header">
+    <div class="page-title">周复盘</div>
+    <div class="page-sub">自动汇总本周计划完成情况</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📊 周复盘</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm btn-outline" onclick="changeWeek(-1)">‹</button>
+        <button class="btn btn-sm btn-outline" onclick="changeWeek(1)">›</button>
+      </div>
+    </div>
+    <div id="weekDisplay" style="text-align:center;font-size:14px;margin-bottom:12px;font-weight:600;"></div>
+    <div id="reviewContent"></div>
+  </div>
+</div>
+
+<!-- ===== 月计划 ===== -->
+<div class="panel" id="panel-monthly">
+  <div class="page-header">
+    <div class="page-title">月计划</div>
+    <div class="page-sub">月度目标、日历总览与月末复盘</div>
+  </div>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="current-month" id="currentMonthDisplay"></div>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="month-stat-grid" id="monthStatGrid"></div>
+
+  <div class="card">
+    <div class="card-title"><span>🗓 月历总览</span></div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div style="display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--text-light);margin-top:8px;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>完成</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--warning);"></span>部分</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--danger);"></span>未完成</span>
+    </div>
+  </div>
+
+  <div class="month-goal-card">
+    <div class="goal-title">
+      <span>🎯 本月总目标</span>
+      <span class="pct" id="monthGoalPercent">0%</span>
+    </div>
+    <textarea id="monthlyGoal" placeholder="本月总体目标：比如英语单词背完3000个，专业课完成一轮复习，政治开始看课..." oninput="saveMonthlyData()" style="min-height:80px;"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📚 分项目标</span>
+      <button class="btn btn-sm btn-outline" onclick="addSubjectGoal()">+ 添加</button>
+    </div>
+    <div id="subjectGoalsList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>📝 月末复盘</span></div>
+    <textarea id="monthlySummary" placeholder="月末总结：本月目标达成情况、主要问题、下月改进方向..." oninput="saveMonthlyData()" style="min-height:100px;"></textarea>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+<div class="save-indicator" id="saveIndicator">已保存 ✓</div>
+
+<script>
+// ========== Service Worker 注册 ==========
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ========== 数据层 ==========
+const STORAGE_KEY = 'study_planner_data';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      // 兼容旧数据：迁移 kaoyan_workbench_data
+      return d;
+    }
+  } catch(e) {}
+  // 尝试迁移旧数据
+  try {
+    const old = localStorage.getItem('kaoyan_workbench_data');
+    if (old) return JSON.parse(old);
+  } catch(e) {}
+  return initData();
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  showSaveIndicator();
+}
+
+function initData() {
+  return {
+    plans: {},
+    english: {},
+    politics: {},
+    courses: [
+      { id: 'c1', name: '专业课一', expanded: false, chapters: [] },
+      { id: 'c2', name: '专业课二', expanded: false, chapters: [] },
+      { id: 'c3', name: '专业课三', expanded: false, chapters: [] }
+    ],
+    courses2: [],
+    newsIndex: 0,
+    wordIndex: 0,
+    pointIndex: 0,
+    currentWeekOffset: 0,
+    currentMonthOffset: 0,
+    monthlyPlans: {},
+    pet: { type: 'cat1', name: '灰灰', hunger: 60, happy: 60, streak: 0, lastFeedDate: '', clothes: 0 }
+  };
+}
+
+let appData = loadData();
+let viewDate = getTodayKey();
+let viewMonth = new Date();
+
+// ========== 日期工具 ==========
+function getTodayKey() {
+  return formatDateKey(new Date());
+}
+
+function formatDateKey(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function parseDateKey(key) {
+  const [y,m,d] = key.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function changeDate(delta) {
+  const d = parseDateKey(viewDate);
+  d.setDate(d.getDate() + delta);
+  viewDate = formatDateKey(d);
+  renderPlanPanel();
+}
+
+function scrollToToday() {
+  viewDate = getTodayKey();
+  renderPlanPanel();
+}
+
+function getWeekNumber(d) {
+  const onejan = new Date(d.getFullYear(), 0, 1);
+  return Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+}
+
+function getDayOfWeek(d) {
+  return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+}
+
+// ========== 侧边栏 ==========
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'plan') renderPlanPanel();
+  if (tab === 'english') renderEnglishPanel();
+  if (tab === 'politics') renderPoliticsPanel();
+  if (tab === 'major') renderMajorPanel();
+  if (tab === 'review') renderReviewPanel();
+  if (tab === 'monthly') renderMonthlyPanel();
+  // 移动端切换后关闭侧边栏
+  if (window.innerWidth <= 600) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+}
+
+// ========== 头部渲染 ==========
+function renderHeader() {
+  const d = new Date();
+  document.getElementById('sidebarDate').textContent =
+    `${d.getMonth()+1}月${d.getDate()}日 ${getDayOfWeek(d)}`;
+  document.getElementById('sidebarWeek').textContent = `第${getWeekNumber(d)}周`;
+}
+
+// ========== 日计划 ==========
+function renderPlanPanel() {
+  const d = parseDateKey(viewDate);
+  const isToday = viewDate === getTodayKey();
+  document.getElementById('currentDateDisplay').textContent =
+    `${d.getMonth()+1}月${d.getDate()}日 ${getDayOfWeek(d)}`;
+  document.getElementById('todayIndicator').textContent = isToday ? '今天' : '';
+  const plan = appData.plans[viewDate] || {};
+  // 兼容旧数据：把纯文本转成 todo 数组
+  if (!plan.todos && (plan.goal || plan.done)) {
+    plan.todos = [];
+    if (plan.goal) {
+      plan.goal.split(/[\n,，;；]/).forEach(t => {
+        t = t.trim();
+        if (t) plan.todos.push({ text: t, done: false });
+      });
+    }
+    if (plan.done) {
+      plan.done.split(/[\n,，;；]/).forEach(t => {
+        t = t.trim();
+        if (t) {
+          // 找已存在的同名项标记完成，否则新增
+          const exist = plan.todos.find(x => x.text === t);
+          if (exist) exist.done = true;
+          else plan.todos.push({ text: t, done: true });
+        }
+      });
+    }
+  }
+  document.getElementById('planReview').value = plan.review || '';
+  renderGoalTodos();
+  renderHistoryList();
+}
+
+function renderGoalTodos() {
+  const plan = appData.plans[viewDate] || {};
+  const todos = plan.todos || [];
+  const container = document.getElementById('goalTodoList');
+  if (todos.length === 0) {
+    container.innerHTML = '<div style="padding:8px 12px;color:var(--text-lighter);font-size:13px;text-align:center;">还没有任务，下面添加或语音输入</div>';
+  } else {
+    container.innerHTML = todos.map((t, i) => `
+      <div class="todo-item ${t.done ? 'done' : ''}">
+        <div class="todo-checkbox ${t.done ? 'checked' : ''}" onclick="toggleGoalTodo(${i})"></div>
+        <span class="todo-text">${escapeHtml(t.text)}</span>
+        <button class="todo-delete" onclick="deleteGoalTodo(${i})">✕</button>
+      </div>
+    `).join('');
+  }
+  // 更新进度
+  const done = todos.filter(t => t.done).length;
+  const pct = todos.length ? Math.round(done / todos.length * 100) : 0;
+  document.getElementById('goalProgressText').textContent = `${done}/${todos.length}`;
+  document.getElementById('goalProgressBar').style.width = pct + '%';
+  document.getElementById('goalProgressPct').textContent = pct + '%';
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function addGoalTodo(text) {
+  const input = document.getElementById('goalTodoInput');
+  const val = text || input.value.trim();
+  if (!val) return;
+  if (!appData.plans[viewDate]) appData.plans[viewDate] = {};
+  if (!appData.plans[viewDate].todos) appData.plans[viewDate].todos = [];
+  appData.plans[viewDate].todos.push({ text: val, done: false });
+  input.value = '';
+  saveCurrentPlan();
+  renderGoalTodos();
+}
+
+function toggleGoalTodo(i) {
+  const plan = appData.plans[viewDate];
+  if (plan && plan.todos) {
+    plan.todos[i].done = !plan.todos[i].done;
+    saveCurrentPlan();
+    renderGoalTodos();
+  }
+}
+
+function deleteGoalTodo(i) {
+  const plan = appData.plans[viewDate];
+  if (plan && plan.todos) {
+    plan.todos.splice(i, 1);
+    saveCurrentPlan();
+    renderGoalTodos();
+  }
+}
+
+function saveCurrentPlan() {
+  if (!appData.plans[viewDate]) appData.plans[viewDate] = {};
+  // todos 已经在 addGoalTodo/toggleGoalTodo 里直接改了，这里只存 review
+  appData.plans[viewDate].review = document.getElementById('planReview').value;
+  // 清除旧的 goal/done 文本字段
+  delete appData.plans[viewDate].goal;
+  delete appData.plans[viewDate].done;
+  saveData(appData);
+}
+
+function renderHistoryList() {
+  const dates = Object.keys(appData.plans).sort().reverse();
+  const container = document.getElementById('historyList');
+  if (dates.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📋</div>还没有历史记录</div>';
+    return;
+  }
+  container.innerHTML = dates.slice(0, 10).map(key => {
+    const plan = appData.plans[key];
+    const hasData = (plan.todos && plan.todos.length > 0) || plan.goal || plan.done || plan.review;
+    const d = parseDateKey(key);
+    return `<div class="history-item" onclick="viewDate='${key}';renderPlanPanel();">
+      <span class="history-date">${d.getMonth()+1}月${d.getDate()}日 ${getDayOfWeek(d)}</span>
+      <span class="history-status ${hasData ? 'has-data' : 'no-data'}">${hasData ? '有记录' : '空'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ========== 英语 ==========
+function renderEnglishPanel() {
+  const today = getTodayKey();
+  const eng = appData.english[today] || {};
+  document.getElementById('wordGoal').value = eng.wordGoal || 200;
+  document.getElementById('wordDone').value = eng.wordDone || 0;
+  updateWordProgress();
+  renderWordStats();
+  renderWordCard();
+}
+
+function saveEnglishData() {
+  const today = getTodayKey();
+  if (!appData.english[today]) appData.english[today] = {};
+  appData.english[today].wordGoal = parseInt(document.getElementById('wordGoal').value) || 0;
+  appData.english[today].wordDone = parseInt(document.getElementById('wordDone').value) || 0;
+  saveData(appData);
+  updateWordProgress();
+}
+
+function updateWordProgress() {
+  const goal = parseInt(document.getElementById('wordGoal').value) || 1;
+  const done = parseInt(document.getElementById('wordDone').value) || 0;
+  const pct = Math.min(100, Math.round(done/goal*100));
+  document.getElementById('wordPercent').textContent = pct + '%';
+  document.getElementById('wordBar').style.width = pct + '%';
+}
+
+function renderWordStats() {
+  const today = new Date();
+  const weekDates = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    weekDates.push(formatDateKey(d));
+  }
+  let totalGoal = 0, totalDone = 0;
+  const dailyHtml = weekDates.map(key => {
+    const e = appData.english[key];
+    if (e) {
+      totalGoal += e.wordGoal || 0;
+      totalDone += e.wordDone || 0;
+      const d = parseDateKey(key);
+      const pct = e.wordGoal ? Math.min(100, Math.round(e.wordDone/e.wordGoal*100)) : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e2e8f0;">
+        <span>${d.getMonth()+1}/${d.getDate()}</span>
+        <span>${e.wordDone||0}/${e.wordGoal||0}</span>
+        <span style="color:${pct>=80?'var(--success)':pct>=50?'var(--warning)':'var(--danger)'};">${pct}%</span>
+      </div>`;
+    }
+    return '';
+  }).join('');
+  document.getElementById('wordStats').innerHTML = `
+    <div style="margin-bottom:8px;">
+      <strong>本周总计：${totalDone}/${totalGoal} 个</strong>
+      <span style="margin-left:8px;color:var(--primary);">完成率 ${totalGoal?Math.round(totalDone/totalGoal*100):0}%</span>
+    </div>
+    ${dailyHtml || '<div class="empty-state">本周暂无数据</div>'}
+  `;
+}
+
+function jumpToMomo() {
+  showToast('请切换到手机桌面，打开「墨墨背单词」App 📱');
+}
+
+// ========== 政治 ==========
+const NEWS_DATA = [
+  { tag:'科技创新', title:'国家加快推进科技自立自强', content:'强调关键核心技术攻关，聚焦人工智能、量子信息、生物技术等前沿领域，强化国家战略科技力量。' },
+  { tag:'乡村振兴', title:'全面推进乡村振兴战略', content:'巩固拓展脱贫攻坚成果同乡村振兴有效衔接，加快农业农村现代化，保障粮食安全，推动种业振兴。' },
+  { tag:'生态文明', title:'生态文明建设持续深化', content:'坚持绿水青山就是金山银山理念，推进山水林田湖草沙一体化保护和系统治理，碳达峰碳中和稳步推进。' },
+  { tag:'经济建设', title:'推动经济高质量发展', content:'加快构建新发展格局，着力推动高质量发展，大力发展新质生产力，促进数字经济和实体经济深度融合。' },
+  { tag:'法治建设', title:'全面依法治国深入推进', content:'坚持依法治国、依法执政、依法行政共同推进，法治国家、法治政府、法治社会一体建设。' },
+  { tag:'民生保障', title:'切实保障和改善民生', content:'就业优先战略深入实施，社会保障体系不断完善，教育、医疗、养老等公共服务持续优化。' },
+  { tag:'对外开放', title:'高水平对外开放迈出新步伐', content:'共建"一带一路"高质量发展，稳步扩大规则、规制、管理、标准等制度型开放。' },
+  { tag:'粮食安全', title:'牢牢端稳中国饭碗', content:'实施新一轮千亿斤粮食产能提升行动，严守耕地红线，推进种业振兴行动，保障国家粮食安全。' },
+  { tag:'文化建设', title:'坚定文化自信自强', content:'弘扬社会主义核心价值观，传承中华优秀传统文化，繁荣发展文化事业和文化产业。' },
+  { tag:'党的建设', title:'深入推进新时代党的建设', content:'以党的政治建设为统领，全面推进党的各项建设，反腐败斗争取得压倒性胜利并全面巩固。' },
+  { tag:'国家安全', title:'贯彻总体国家安全观', content:'统筹发展和安全，有效防范化解重大风险，维护国家主权、安全、发展利益。' },
+  { tag:'区域协调', title:'区域协调发展新格局', content:'深入实施区域协调发展战略、区域重大战略、主体功能区战略，优化重大生产力布局。' },
+  { tag:'数字中国', title:'加快建设数字中国', content:'数字基础设施不断完善，数字政府建设成效显著，数字化转型全面赋能经济社会发展。' },
+  { tag:'人才培养', title:'深入实施人才强国战略', content:'坚持党管人才原则，深化人才发展体制机制改革，聚天下英才而用之。' },
+  { tag:'种业振兴', title:'种业振兴行动取得新进展', content:'加强种质资源保护利用，推进种业科技创新，培育具有自主知识产权的优良品种，打好种业翻身仗。' },
+  { tag:'绿色发展', title:'推动绿色低碳发展', content:'加快发展方式绿色转型，推动形成绿色低碳的生产方式和生活方式，深入推进环境污染防治。' },
+  { tag:'全过程民主', title:'发展全过程人民民主', content:'坚持和完善人民代表大会制度，全面发展全过程人民民主，保障人民当家作主。' },
+  { tag:'新型城镇化', title:'深入推进新型城镇化', content:'坚持以人为核心的新型城镇化，加快农业转移人口市民化，促进大中小城市和小城镇协调发展。' },
+  { tag:'统一大市场', title:'加快建设全国统一大市场', content:'破除地方保护和行政性垄断，促进商品要素资源在更大范围内畅通流动。' },
+  { tag:'对外开放', title:'推动共建一带一路高质量发展', content:'坚持共商共建共享原则，巩固互联互通合作基础，拓展健康、绿色、数字、创新等新领域合作。' }
+];
+
+// 考研高频词库
+const WORDS_DATA = [
+  {word:"abandon",phonetic:"/əˈbændən/",meaning:"vt. 放弃；遗弃",example:"He had to abandon his research due to lack of funding."},
+  {word:"absorb",phonetic:"/əbˈzɔːrb/",meaning:"vt. 吸收；吸引注意力",example:"Plants absorb nutrients from the soil through their roots."},
+  {word:"abstract",phonetic:"/ˈæbstrækt/",meaning:"adj. 抽象的；n. 摘要",example:"The concept of justice is too abstract for a child to understand."},
+  {word:"abundant",phonetic:"/əˈbʌndənt/",meaning:"adj. 丰富的；充裕的",example:"The region is abundant in natural resources such as oil and gas."},
+  {word:"accelerate",phonetic:"/əkˈseləreɪt/",meaning:"v. 加速；促进",example:"Exposure to sunlight will accelerate the growth of these plants."},
+  {word:"access",phonetic:"/ˈækses/",meaning:"n. 进入；通道；使用权",example:"Students have free access to the university library's digital resources."},
+  {word:"accommodate",phonetic:"/əˈkɑːmədeɪt/",meaning:"vt. 容纳；提供住宿；适应",example:"The new stadium can accommodate up to 80,000 spectators."},
+  {word:"accomplish",phonetic:"/əˈkɑːmplɪʃ/",meaning:"vt. 完成；实现",example:"She accomplished her goal of running a marathon within six months."},
+  {word:"accumulate",phonetic:"/əˈkjuːmjəleɪt/",meaning:"v. 积累；积聚",example:"Over the years, he accumulated a vast collection of rare books."},
+  {word:"acknowledge",phonetic:"/əkˈnɑːlɪdʒ/",meaning:"vt. 承认；致谢",example:"The scientist acknowledged the contributions of her research team."},
+  {word:"acquire",phonetic:"/əˈkwaɪər/",meaning:"vt. 获得；习得",example:"It takes years of practice to acquire fluency in a foreign language."},
+  {word:"adapt",phonetic:"/əˈdæpt/",meaning:"v. 适应；改编",example:"Companies must adapt to changing market conditions to survive."},
+  {word:"adequate",phonetic:"/ˈædɪkwət/",meaning:"adj. 足够的；适当的",example:"The report did not provide adequate evidence to support its claims."},
+  {word:"advocate",phonetic:"/ˈædvəkeɪt/",meaning:"vt. 提倡；拥护 / n. 倡导者",example:"Many experts advocate reducing carbon emissions to combat climate change."},
+  {word:"alternative",phonetic:"/ɔːlˈtɜːrnətɪv/",meaning:"n. 替代方案；adj. 替代的",example:"Solar energy is a promising alternative to fossil fuels."},
+  {word:"ambiguous",phonetic:"/æmˈbɪɡjuəs/",meaning:"adj. 模棱两可的；含糊的",example:"The contract contains several ambiguous clauses that need clarification."},
+  {word:"analyze",phonetic:"/ˈænəlaɪz/",meaning:"vt. 分析；解析",example:"Researchers analyzed the data to identify patterns in consumer behavior."},
+  {word:"apparent",phonetic:"/əˈpærənt/",meaning:"adj. 明显的；表面上的",example:"It soon became apparent that the project was over budget."},
+  {word:"approach",phonetic:"/əˈproʊtʃ/",meaning:"v./n. 接近；方法；途径",example:"We need a new approach to solving this complex problem."},
+  {word:"appropriate",phonetic:"/əˈproʊpriət/",meaning:"adj. 适当的；合适的",example:"The company will take appropriate measures to address the safety concerns."},
+  {word:"assess",phonetic:"/əˈses/",meaning:"vt. 评估；评定",example:"Teachers need to assess students' progress throughout the semester."},
+  {word:"assume",phonetic:"/əˈsuːm/",meaning:"vt. 假设；承担",example:"We cannot simply assume that the current trend will continue indefinitely."},
+  {word:"attribute",phonetic:"/əˈtrɪbjuːt/",meaning:"vt. 归因于 / n. 属性",example:"The success of the project can be attributed to effective teamwork."},
+  {word:"available",phonetic:"/əˈveɪləbl/",meaning:"adj. 可获得的；有空的",example:"The report will be made available to the public next week."},
+  {word:"barrier",phonetic:"/ˈbæriər/",meaning:"n. 障碍；壁垒",example:"Language barriers can create significant challenges in international business."},
+  {word:"bias",phonetic:"/ˈbaɪəs/",meaning:"n. 偏见；倾向",example:"The study was criticized for having a selection bias in its sample."},
+  {word:"capacity",phonetic:"/kəˈpæsəti/",meaning:"n. 能力；容量",example:"The human brain has an astonishing capacity for learning and adaptation."},
+  {word:"circumstance",phonetic:"/ˈsɜːrkəmstæns/",meaning:"n. 环境；情况",example:"Under no circumstances should confidential information be disclosed."},
+  {word:"cognitive",phonetic:"/ˈkɑːɡnətɪv/",meaning:"adj. 认知的",example:"Cognitive development in early childhood is crucial for later academic success."},
+  {word:"compensate",phonetic:"/ˈkɑːmpenseɪt/",meaning:"v. 补偿；弥补",example:"The insurance company agreed to compensate the victims for their losses."},
+  {word:"comprehensive",phonetic:"/ˌkɑːmprɪˈhensɪv/",meaning:"adj. 全面的；综合的",example:"The government proposed a comprehensive reform of the healthcare system."},
+  {word:"concept",phonetic:"/ˈkɑːnsept/",meaning:"n. 概念；观念",example:"The concept of sustainable development has gained widespread acceptance."},
+  {word:"consequence",phonetic:"/ˈkɑːnsɪkwens/",meaning:"n. 后果；结果",example:"The economic consequences of the pandemic were felt across the globe."},
+  {word:"conserve",phonetic:"/kənˈsɜːrv/",meaning:"vt. 保护；节约",example:"We should all make an effort to conserve water and energy in daily life."},
+  {word:"constitute",phonetic:"/ˈkɑːnstɪtuːt/",meaning:"vt. 构成；组成",example:"Women now constitute over half of the student body at the university."},
+  {word:"consume",phonetic:"/kənˈsuːm/",meaning:"vt. 消费；消耗",example:"Households consume more electricity during the summer months due to air conditioning."},
+  {word:"contemporary",phonetic:"/kənˈtempəreri/",meaning:"adj. 当代的；同时代的",example:"The museum features works by contemporary artists from around the world."},
+  {word:"contribute",phonetic:"/kənˈtrɪbjuːt/",meaning:"v. 贡献；捐献；促成",example:"Regular exercise contributes significantly to both physical and mental health."},
+  {word:"controversy",phonetic:"/ˈkɑːntrəvɜːrsi/",meaning:"n. 争议；争论",example:"The new policy has sparked considerable controversy among industry experts."},
+  {word:"conventional",phonetic:"/kənˈvenʃənl/",meaning:"adj. 传统的；常规的",example:"Conventional farming methods often rely heavily on chemical fertilizers."},
+  {word:"convince",phonetic:"/kənˈvɪns/",meaning:"vt. 说服；使信服",example:"The lawyer managed to convince the jury of her client's innocence."},
+  {word:"corporate",phonetic:"/ˈkɔːrpərət/",meaning:"adj. 公司的；法人的",example:"The company places great emphasis on corporate social responsibility."},
+  {word:"crucial",phonetic:"/ˈkruːʃl/",meaning:"adj. 关键的；至关重要的",example:"Effective communication is crucial for the success of any team project."},
+  {word:"debate",phonetic:"/dɪˈbeɪt/",meaning:"n./v. 辩论；争论",example:"There is an ongoing debate about the ethics of artificial intelligence."},
+  {word:"decline",phonetic:"/dɪˈklaɪn/",meaning:"v./n. 下降；衰退；婉拒",example:"The population of rural areas has been in steady decline for decades."},
+  {word:"demonstrate",phonetic:"/ˈdemənstreɪt/",meaning:"vt. 证明；演示；表明",example:"The experiment clearly demonstrates the relationship between temperature and pressure."},
+  {word:"derive",phonetic:"/dɪˈraɪv/",meaning:"v. 获得；源自",example:"Many English words derive from Latin and Greek roots."},
+  {word:"diminish",phonetic:"/dɪˈmɪnɪʃ/",meaning:"v. 减少；削弱",example:"Over time, the effectiveness of the treatment began to diminish."},
+  {word:"discipline",phonetic:"/ˈdɪsəplɪn/",meaning:"n. 纪律；学科；训练",example:"Academic discipline is essential for achieving long-term educational goals."},
+  {word:"discrimination",phonetic:"/dɪˌskrɪmɪˈneɪʃn/",meaning:"n. 歧视；辨别",example:"Laws have been enacted to prevent discrimination in the workplace."},
+  {word:"distinction",phonetic:"/dɪˈstɪŋkʃn/",meaning:"n. 区别；卓越",example:"There is a clear distinction between correlation and causation in research."},
+  {word:"diverse",phonetic:"/daɪˈvɜːrs/",meaning:"adj. 多样的；不同的",example:"The university attracts students from diverse cultural backgrounds."},
+  {word:"domestic",phonetic:"/dəˈmestɪk/",meaning:"adj. 国内的；家庭的",example:"The government has introduced policies to stimulate domestic consumption."},
+  {word:"dominant",phonetic:"/ˈdɑːmɪnənt/",meaning:"adj. 主导的；占优势的",example:"English has become the dominant language of international scientific communication."},
+  {word:"dramatic",phonetic:"/drəˈmætɪk/",meaning:"adj. 戏剧性的；巨大的",example:"The past decade has seen dramatic advances in medical technology."},
+  {word:"eliminate",phonetic:"/ɪˈlɪmɪneɪt/",meaning:"vt. 消除；淘汰",example:"The new security measures aim to eliminate the risk of unauthorized access."},
+  {word:"emerge",phonetic:"/iˈmɜːrdʒ/",meaning:"vi. 出现；浮现",example:"New evidence has emerged that could change the outcome of the trial."},
+  {word:"emphasis",phonetic:"/ˈemfəsɪs/",meaning:"n. 强调；重点",example:"The company places great emphasis on innovation and quality control."},
+  {word:"enable",phonetic:"/ɪˈneɪbl/",meaning:"vt. 使能够；使成为可能",example:"The scholarship enabled students from low-income families to attend college."},
+  {word:"enhance",phonetic:"/ɪnˈhæns/",meaning:"vt. 增强；提高",example:"Regular reading can significantly enhance vocabulary and critical thinking skills."}
+];
+
+// 考研政治知识点
+const POLITICS_POINTS = [
+  {chapter:"马原",title:"哲学基本问题与物质观",content:"哲学基本问题是思维与存在的关系问题。物质是标志客观实在的哲学范畴，不依赖于人的意识而存在。世界的真正统一性在于其物质性，意识是物质世界长期发展的产物。"},
+  {chapter:"马原",title:"物质与意识的辩证关系",content:"物质决定意识，意识对物质具有能动反作用。意识活动具有目的性、计划性和创造性，能够指导实践改造客观世界。正确发挥主观能动性必须以尊重客观规律为前提。"},
+  {chapter:"马原",title:"对立统一规律",content:"对立统一规律是唯物辩证法的实质和核心。矛盾具有同一性和斗争性两种基本属性。矛盾具有普遍性与特殊性，普遍性寓于特殊性之中，具体问题须具体分析。"},
+  {chapter:"马原",title:"实践与认识的关系",content:"实践是认识的基础，是检验真理的唯一标准。认识具有反复性和无限性，从实践到认识、再从认识到实践，循环往复、不断深化。真理是客观的、绝对的，又是相对的。"},
+  {chapter:"马原",title:"社会存在与社会意识",content:"社会存在决定社会意识，社会意识对社会存在具有反作用。生产力决定生产关系，经济基础决定上层建筑。这是人类社会发展的基本规律。"},
+  {chapter:"马原",title:"价值规律与商品经济",content:"商品的价值量由生产商品的社会必要劳动时间决定。价值规律通过价格围绕价值上下波动发挥作用，调节资源配置，促进生产力发展，也产生优胜劣汰。"},
+  {chapter:"马原",title:"资本主义生产过程的二重性",content:"资本主义生产过程是劳动过程和价值增殖过程的统一。剩余价值是雇佣工人创造的被资本家无偿占有的超过劳动力价值的价值，体现资本主义剥削本质。"},
+  {chapter:"马原",title:"经济全球化及其影响",content:"经济全球化是生产力发展的客观要求。它推动了世界经济增长，但也带来发展不平衡、金融风险传染等问题。要以人类命运共同体理念引领经济全球化。"},
+  {chapter:"马原",title:"人民群众是历史的创造者",content:"人民群众是物质财富的创造者、精神财富的创造者、社会变革的决定力量。群众路线是党的根本工作路线：一切为了群众，一切依靠群众，从群众中来，到群众中去。"},
+  {chapter:"马原",title:"共产主义理想与实践",content:"共产主义是历史发展的必然趋势，是实现人的自由而全面发展的社会。坚定理想信念，把远大理想与共同理想结合起来，脚踏实地推进中国特色社会主义事业。"},
+  {chapter:"毛中特",title:"毛泽东思想活的灵魂",content:"实事求是、群众路线、独立自主是毛泽东思想活的灵魂。实事求是是根本思想原则，群众路线是根本工作路线，独立自主是根本立足点。"},
+  {chapter:"毛中特",title:"新民主主义革命总路线",content:"新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。革命前途是社会主义，分两步走：新民主主义革命和社会主义革命。"},
+  {chapter:"毛中特",title:"三大改造的历史意义",content:"1956年三大改造完成，标志着社会主义基本制度在我国初步确立。这是一场前无古人的创举，实现了中国从新民主主义到社会主义的伟大转变。"},
+  {chapter:"毛中特",title:"社会主义本质论",content:"社会主义的本质是解放生产力，发展生产力，消灭剥削，消除两极分化，最终达到共同富裕。邓小平的社会主义本质论把对社会主义的认识提高到了新水平。"},
+  {chapter:"毛中特",title:"社会主义初级阶段理论",content:"我国正处于并将长期处于社会主义初级阶段。这是我国最大的实际、最基本的国情。制定一切路线方针政策都必须以此为依据，不能超越阶段。"},
+  {chapter:"毛中特",title:"党的基本路线",content:"领导和团结全国各族人民，以经济建设为中心，坚持四项基本原则，坚持改革开放，自力更生，艰苦创业，为把我国建设成为社会主义现代化强国而奋斗。"},
+  {chapter:"毛中特",title:"新时代中国特色社会主义思想",content:"习近平新时代中国特色社会主义思想是马克思主义中国化的最新成果。明确坚持和发展中国特色社会主义的总任务是实现社会主义现代化和中华民族伟大复兴。"},
+  {chapter:"毛中特",title:"五位一体总体布局",content:"经济建设、政治建设、文化建设、社会建设、生态文明建设五位一体总体布局，是一个相互联系、相互促进的有机整体，全面推进中国特色社会主义事业。"},
+  {chapter:"毛中特",title:"四个全面战略布局",content:"全面建设社会主义现代化国家、全面深化改革、全面依法治国、全面从严治党。四个全面相辅相成，构成新时代战略布局，引领民族复兴。"},
+  {chapter:"毛中特",title:"构建人类命运共同体",content:"构建人类命运共同体是新时代中国特色社会主义外交的总目标。坚持和平发展道路，推动建设相互尊重、公平正义、合作共赢的新型国际关系。"},
+  {chapter:"史纲",title:"近代中国半殖民地半封建社会性质",content:"近代中国社会的性质是半殖民地半封建社会。这一性质决定了近代中国社会的主要矛盾是帝国主义与中华民族的矛盾、封建主义与人民大众的矛盾。"},
+  {chapter:"史纲",title:"辛亥革命的历史意义与局限",content:"辛亥革命推翻了封建帝制，使民主共和观念深入人心，但未能改变中国半殖民地半封建社会性质。其失败证明：资产阶级共和国道路在中国走不通。"},
+  {chapter:"史纲",title:"五四运动的历史意义",content:"五四运动是中国新民主主义革命的开端。促进了马克思主义在中国的传播，为中国共产党的成立做了思想上和干部上的准备。"},
+  {chapter:"史纲",title:"中国共产党的成立",content:"1921年中国共产党成立，这是开天辟地的大事变。自从有了中国共产党，中国革命的面貌就焕然一新了。党的初心和使命是为中国人民谋幸福、为中华民族谋复兴。"},
+  {chapter:"史纲",title:"遵义会议的历史地位",content:"遵义会议确立了毛泽东在党中央和红军的领导地位，开始确立以毛泽东为主要代表的马克思主义正确路线在党中央的领导地位，是党的历史上生死攸关的转折点。"},
+  {chapter:"史纲",title:"抗日战争的中流砥柱",content:"中国共产党是抗日战争的中流砥柱。提出全面抗战路线和持久战的战略总方针，开辟敌后战场，成为坚持抗战、争取胜利的中坚力量。"},
+  {chapter:"史纲",title:"延安整风运动",content:"延安整风是一次全党范围的马克思主义思想教育运动。主要内容是反对主观主义以整顿学风、反对宗派主义以整顿党风、反对党八股以整顿文风。"},
+  {chapter:"史纲",title:"新中国的成立",content:"1949年中华人民共和国成立，标志着新民主主义革命取得基本胜利，标志着中国半殖民地半封建社会的结束，标志着中国从此走上了独立、民主、统一的道路。"},
+  {chapter:"史纲",title:"社会主义建设的初步探索",content:"社会主义改造完成后，党领导人民开展社会主义建设探索。《论十大关系》和正确处理人民内部矛盾的理论成果，为中国特色社会主义建设提供了借鉴。"},
+  {chapter:"史纲",title:"改革开放的伟大决策",content:"1978年十一届三中全会作出把工作重点转移到社会主义现代化建设上来和实行改革开放的决策，开启了改革开放和社会主义现代化建设新时期。"},
+  {chapter:"思修",title:"社会主义核心价值观",content:"富强、民主、文明、和谐是国家层面的价值目标；自由、平等、公正、法治是社会层面的价值取向；爱国、敬业、诚信、友善是公民层面的价值准则。"},
+  {chapter:"思修",title:"理想信念的作用",content:"理想信念是精神之钙。指引人生的奋斗目标，提供人生的前进动力，提高人生的精神境界。要把个人理想融入社会共同理想之中。"},
+  {chapter:"思修",title:"爱国主义的时代要求",content:"爱国主义是中华民族精神的核心。新时代爱国主义要求：坚持爱国爱党爱社会主义相统一，维护祖国统一和民族团结，尊重和传承中华民族历史。"},
+  {chapter:"思修",title:"人生价值的实现",content:"人生价值包括社会价值和自我价值。社会价值是实现自我价值的基础。实现人生价值需要从社会客观条件出发，不断提高自身能力，在实践中创造价值。"},
+  {chapter:"思修",title:"道德的功能与作用",content:"道德具有认识功能、规范功能、调节功能。道德是衡量一个社会发展水平的重要标尺，在治国理政中发挥着重要作用。"},
+  {chapter:"思修",title:"社会公德的主要内容",content:"文明礼貌、助人为乐、爱护公物、保护环境、遵纪守法。社会公德是维护公共秩序的重要手段，是公民应尽的社会责任和道德义务。"},
+  {chapter:"思修",title:"职业道德的基本要求",content:"爱岗敬业、诚实守信、办事公道、热情服务、奉献社会。职业道德是社会主义核心价值观在工作领域的重要体现。"},
+  {chapter:"思修",title:"家庭美德的基本规范",content:"尊老爱幼、男女平等、夫妻和睦、勤俭持家、邻里团结。家庭美德是调节家庭内部成员之间、家庭与家庭之间关系的行为准则。"},
+  {chapter:"思修",title:"法治思维的内涵",content:"法治思维是以法治理念为基础、以法治方式思考和处理问题的思维方式。内容包括法律至上、权力制约、公平正义、权利保障、正当程序。"},
+  {chapter:"思修",title:"宪法是国家的根本法",content:"宪法具有最高的法律地位、法律权威和法律效力。宪法是治国安邦的总章程，是党和人民意志的集中体现，规定国家生活中最根本最重要的问题。"}
+];
+
+function renderPoliticsPanel() {
+  const today = getTodayKey();
+  if (!appData.politics[today]) appData.politics[today] = {};
+  document.getElementById('politicsNote').value = appData.politics[today].note || '';
+  renderNews();
+  renderPoint();
+}
+
+function renderNews() {
+  const idx = appData.newsIndex % NEWS_DATA.length;
+  const news = NEWS_DATA[idx];
+  const today = getTodayKey();
+  document.getElementById('newsContainer').innerHTML = `
+    <div class="news-card">
+      <div class="news-date">${today}</div>
+      <div class="news-title">${news.title}</div>
+      <div class="news-content">${news.content}</div>
+      <span class="news-tag">${news.tag}</span>
+    </div>
+    <div style="font-size:11px;color:var(--text-lighter);margin-top:6px;">
+      第 ${idx+1} / ${NEWS_DATA.length} 条 · 点击"换一条"查看更多
+    </div>
+  `;
+}
+
+function nextNews() {
+  appData.newsIndex = (appData.newsIndex + 1) % NEWS_DATA.length;
+  saveData(appData);
+  renderNews();
+}
+
+function savePoliticsData() {
+  const today = getTodayKey();
+  if (!appData.politics[today]) appData.politics[today] = {};
+  appData.politics[today].note = document.getElementById('politicsNote').value;
+  saveData(appData);
+}
+
+// 每日高频词
+function renderWordCard() {
+  const idx = (appData.wordIndex || 0) % WORDS_DATA.length;
+  const w = WORDS_DATA[idx];
+  document.getElementById('wordCard').innerHTML = `
+    <div class="word-card">
+      <div class="w-word">${w.word}</div>
+      <div class="w-phonetic">${w.phonetic}</div>
+      <div class="w-meaning">${w.meaning}</div>
+      <div class="w-example">${w.example}</div>
+      <div style="font-size:11px;color:var(--text-lighter);margin-top:8px;">
+        第 ${idx+1} / ${WORDS_DATA.length} 个 · 考研高频词
+      </div>
+    </div>
+  `;
+}
+
+function nextWord() {
+  appData.wordIndex = (appData.wordIndex || 0) + 1;
+  saveData(appData);
+  renderWordCard();
+}
+
+// 每日知识点
+function renderPoint() {
+  const idx = (appData.pointIndex || 0) % POLITICS_POINTS.length;
+  const p = POLITICS_POINTS[idx];
+  document.getElementById('pointContainer').innerHTML = `
+    <div class="point-card">
+      <span class="p-chapter">${p.chapter}</span>
+      <div class="p-title">${p.title}</div>
+      <div class="p-content">${p.content}</div>
+    </div>
+    <div style="font-size:11px;color:var(--text-lighter);margin-top:6px;">
+      第 ${idx+1} / ${POLITICS_POINTS.length} 个 · 考研知识点
+    </div>
+  `;
+}
+
+function nextPoint() {
+  appData.pointIndex = (appData.pointIndex || 0) + 1;
+  saveData(appData);
+  renderPoint();
+}
+
+// ========== 专业课 ==========
+let currentRound = 1;
+
+function switchRound(r) {
+  currentRound = r;
+  document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.round-btn[data-round="${r}"]`).classList.add('active');
+  document.getElementById('round1Panel').style.display = r === 1 ? 'block' : 'none';
+  document.getElementById('round2Panel').style.display = r === 2 ? 'block' : 'none';
+  document.getElementById('round3Panel').style.display = r === 3 ? 'block' : 'none';
+  if (r === 2) renderRecitePanel();
+}
+
+function renderMajorPanel() {
+  const container = document.getElementById('outlineContainer');
+  if (appData.courses.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📚</div>点击右上角添加课程</div>';
+    return;
+  }
+  container.innerHTML = appData.courses.map((course, ci) => renderCourse(course, ci)).join('');
+  renderRecitePanel();
+}
+
+// 二轮背诵
+function renderRecitePanel() {
+  if (!appData.courses2) appData.courses2 = [];
+  const container = document.getElementById('reciteContainer');
+  if (appData.courses2.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📖</div>点击右上角添加课程</div>';
+    return;
+  }
+  container.innerHTML = appData.courses2.map((c, ci) => {
+    const chapters = c.chapters || [];
+    const totalDays = chapters.reduce((s, ch) => s + (ch.days || 0), 0);
+    const passedDays = chapters.reduce((s, ch) => s + (ch.checked ? (ch.days || 0) : 0), 0);
+    return `
+      <div class="outline-item">
+        <div class="outline-header" onclick="toggleCourse2(${ci})">
+          <span class="outline-toggle ${c.expanded?'expanded':''}">▶</span>
+          <span class="outline-label course">📖 ${c.name}</span>
+          <span style="font-size:11px;color:var(--text-light);">${passedDays}/${totalDays}天</span>
+          <div class="outline-actions" onclick="event.stopPropagation();">
+            <button onclick="showAddChapter2(${ci})" title="添加章节">＋</button>
+            <button onclick="deleteCourse2(${ci})" title="删除">🗑</button>
+          </div>
+        </div>
+        <div class="outline-children ${c.expanded?'show':''}">
+          <div class="add-form" id="addChapter2Form_${ci}" style="display:none;">
+            <input type="text" id="newChapter2Name_${ci}" placeholder="章节名">
+            <input type="number" id="newChapter2Days_${ci}" placeholder="天数" style="width:60px;">
+            <button class="btn btn-sm btn-primary" onclick="addChapter2(${ci})">添加</button>
+            <button class="btn btn-sm btn-outline" onclick="document.getElementById('addChapter2Form_${ci}').style.display='none';">取消</button>
+          </div>
+          ${chapters.length === 0 ? '<div style="padding:10px 12px;color:var(--text-lighter);font-size:13px;">暂无章节</div>' :
+            chapters.map((ch, chi) => `
+              <div class="outline-item">
+                <div class="outline-header" style="background:${ch.checked?'#f0fdf4':'#f8fafc'};border-color:${ch.checked?'#bbf7d0':'var(--border)'};">
+                  <div class="todo-checkbox ${ch.checked?'checked':''}" onclick="toggleChapter2(${ci},${chi})"></div>
+                  <span class="outline-label chapter" style="${ch.checked?'text-decoration:line-through;color:var(--text-lighter);':''}">${ch.name}</span>
+                  <span style="font-size:11px;color:var(--text-light);">${ch.days||1}天</span>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCourse2(ci) {
+  appData.courses2[ci].expanded = !appData.courses2[ci].expanded;
+  saveData(appData);
+  renderRecitePanel();
+}
+
+function showAddCourseForm2() {
+  document.getElementById('addCourseForm2').style.display = 'flex';
+  document.getElementById('newCourseName2').focus();
+}
+
+function addCourse2() {
+  const name = document.getElementById('newCourseName2').value.trim();
+  if (!name) return showToast('请输入课程名');
+  if (!appData.courses2) appData.courses2 = [];
+  appData.courses2.push({ id: 'c2'+Date.now(), name, expanded: true, chapters: [] });
+  saveData(appData);
+  document.getElementById('addCourseForm2').style.display = 'none';
+  document.getElementById('newCourseName2').value = '';
+  renderRecitePanel();
+}
+
+function deleteCourse2(ci) {
+  if (!confirm('确认删除？')) return;
+  appData.courses2.splice(ci, 1);
+  saveData(appData);
+  renderRecitePanel();
+}
+
+function showAddChapter2(ci) {
+  document.getElementById('addChapter2Form_' + ci).style.display = 'flex';
+  document.getElementById('newChapter2Name_' + ci).focus();
+}
+
+function addChapter2(ci) {
+  const name = document.getElementById('newChapter2Name_' + ci).value.trim();
+  const days = parseInt(document.getElementById('newChapter2Days_' + ci).value) || 1;
+  if (!name) return showToast('请输入章节名');
+  appData.courses2[ci].chapters.push({ name, days, checked: false });
+  appData.courses2[ci].expanded = true;
+  saveData(appData);
+  renderRecitePanel();
+}
+
+function toggleChapter2(ci, chi) {
+  appData.courses2[ci].chapters[chi].checked = !appData.courses2[ci].chapters[chi].checked;
+  saveData(appData);
+  renderRecitePanel();
+}
+
+function renderMajorPanel() {
+  const container = document.getElementById('outlineContainer');
+  if (appData.courses.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📚</div>点击右上角添加课程</div>';
+    return;
+  }
+  container.innerHTML = appData.courses.map((course, ci) => renderCourse(course, ci)).join('');
+}
+
+function renderCourse(course, ci) {
+  const expanded = course.expanded ? 'expanded' : '';
+  const show = course.expanded ? 'show' : '';
+  let chaptersHtml = '';
+  if (course.chapters && course.chapters.length > 0) {
+    chaptersHtml = course.chapters.map((ch, chi) => renderChapter(course, ch, chi)).join('');
+  }
+  const addChapterForm = `<div class="add-form" id="addChapterForm_${course.id}" style="display:none;">
+    <input type="text" id="newChapterName_${course.id}" placeholder="输入章节名">
+    <button class="btn btn-sm btn-primary" onclick="addChapter(${ci})">添加</button>
+    <button class="btn btn-sm btn-outline" onclick="document.getElementById('addChapterForm_${course.id}').style.display='none';">取消</button>
+  </div>`;
+  return `<div class="outline-item">
+    <div class="outline-header" onclick="toggleCourse(${ci})">
+      <span class="outline-toggle ${expanded}">▶</span>
+      <span class="outline-label course">📖 ${course.name}</span>
+      <div class="outline-actions" onclick="event.stopPropagation();">
+        <button onclick="showAddChapterForm('${course.id}')" title="添加章节">＋</button>
+        <button onclick="deleteCourse(${ci})" title="删除课程">🗑</button>
+      </div>
+    </div>
+    <div class="outline-children ${show}" id="courseChildren_${ci}">
+      ${addChapterForm}
+      ${chaptersHtml || '<div style="padding:10px 12px;color:var(--text-lighter);font-size:13px;">暂无章节，点击 ＋ 添加</div>'}
+    </div>
+  </div>`;
+}
+
+function renderChapter(course, ch, chi) {
+  const expanded = ch.expanded ? 'expanded' : '';
+  const show = ch.expanded ? 'show' : '';
+  const progress = ch.progress || 0;
+  return `<div class="outline-item">
+    <div class="outline-header" onclick="toggleChapter('${course.id}', ${chi})">
+      <span class="outline-toggle ${expanded}">▶</span>
+      <span class="outline-label chapter">${ch.name}</span>
+      <div class="outline-actions" onclick="event.stopPropagation();">
+        <button onclick="deleteChapter('${course.id}', ${chi})" title="删除章节">🗑</button>
+      </div>
+    </div>
+    <div class="outline-children ${show}">
+      <div class="chapter-notes">
+        <div class="note-row">
+          <div class="note-label progress">📊 学习进度：${progress}%</div>
+          <input type="range" min="0" max="100" step="5" value="${progress}"
+            oninput="updateChapterProgress('${course.id}', ${chi}, this.value)" style="width:100%;">
+        </div>
+        <div class="note-row">
+          <div class="note-label keypoints">📌 考点</div>
+          <textarea placeholder="这一章的重点考点..." oninput="saveChapterNote('${course.id}', ${chi}, 'keypoints', this.value)">${ch.keypoints || ''}</textarea>
+        </div>
+        <div class="note-row">
+          <div class="note-label weakness">⚠️ 薄弱点</div>
+          <textarea placeholder="这一章自己觉得薄弱的地方..." oninput="saveChapterNote('${course.id}', ${chi}, 'weakness', this.value)">${ch.weakness || ''}</textarea>
+        </div>
+        <div class="note-row">
+          <div class="note-label" style="color:var(--text-light);">📝 备注</div>
+          <textarea placeholder="其他笔记..." oninput="saveChapterNote('${course.id}', ${chi}, 'remark', this.value)">${ch.remark || ''}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleCourse(ci) {
+  appData.courses[ci].expanded = !appData.courses[ci].expanded;
+  saveData(appData);
+  renderMajorPanel();
+}
+
+function toggleChapter(courseId, chi) {
+  const course = appData.courses.find(c => c.id === courseId);
+  if (course) {
+    course.chapters[chi].expanded = !course.chapters[chi].expanded;
+    saveData(appData);
+    renderMajorPanel();
+  }
+}
+
+function showAddCourseForm() {
+  document.getElementById('addCourseForm').style.display = 'flex';
+  document.getElementById('newCourseName').focus();
+}
+
+function hideAddCourseForm() {
+  document.getElementById('addCourseForm').style.display = 'none';
+  document.getElementById('newCourseName').value = '';
+}
+
+function addCourse() {
+  const name = document.getElementById('newCourseName').value.trim();
+  if (!name) return showToast('请输入课程名');
+  appData.courses.push({ id: 'c' + Date.now(), name, expanded: true, chapters: [] });
+  saveData(appData);
+  hideAddCourseForm();
+  renderMajorPanel();
+  showToast('课程已添加');
+}
+
+function deleteCourse(ci) {
+  if (!confirm('确认删除这门课程及其所有章节？')) return;
+  appData.courses.splice(ci, 1);
+  saveData(appData);
+  renderMajorPanel();
+  showToast('已删除');
+}
+
+function showAddChapterForm(courseId) {
+  document.getElementById('addChapterForm_' + courseId).style.display = 'flex';
+  document.getElementById('newChapterName_' + courseId).focus();
+}
+
+function addChapter(ci) {
+  const course = appData.courses[ci];
+  const name = document.getElementById('newChapterName_' + course.id).value.trim();
+  if (!name) return showToast('请输入章节名');
+  if (!course.chapters) course.chapters = [];
+  course.chapters.push({ name, expanded: false, progress: 0, keypoints: '', weakness: '', remark: '' });
+  course.expanded = true;
+  saveData(appData);
+  renderMajorPanel();
+  showToast('章节已添加');
+}
+
+function deleteChapter(courseId, chi) {
+  if (!confirm('确认删除这个章节？')) return;
+  const course = appData.courses.find(c => c.id === courseId);
+  if (course) {
+    course.chapters.splice(chi, 1);
+    saveData(appData);
+    renderMajorPanel();
+    showToast('已删除');
+  }
+}
+
+function updateChapterProgress(courseId, chi, val) {
+  const course = appData.courses.find(c => c.id === courseId);
+  if (course && course.chapters[chi]) {
+    course.chapters[chi].progress = parseInt(val);
+    saveData(appData);
+    const event = window.event;
+    if (event && event.target) {
+      const label = event.target.parentElement.querySelector('.note-label.progress');
+      if (label) label.textContent = `📊 学习进度：${val}%`;
+    }
+  }
+}
+
+function saveChapterNote(courseId, chi, field, value) {
+  const course = appData.courses.find(c => c.id === courseId);
+  if (course && course.chapters[chi]) {
+    course.chapters[chi][field] = value;
+    saveData(appData);
+  }
+}
+
+// ========== 周复盘 ==========
+function getWeekRange(offset) {
+  const today = new Date();
+  const day = today.getDay() || 7;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - day + 1 + offset * 7);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return { monday, sunday };
+}
+
+function changeWeek(delta) {
+  appData.currentWeekOffset = (appData.currentWeekOffset || 0) + delta;
+  saveData(appData);
+  renderReviewPanel();
+}
+
+function renderReviewPanel() {
+  const offset = appData.currentWeekOffset || 0;
+  const { monday, sunday } = getWeekRange(offset);
+  document.getElementById('weekDisplay').textContent =
+    `${monday.getMonth()+1}月${monday.getDate()}日 - ${sunday.getMonth()+1}月${sunday.getDate()}日`;
+  const weekDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    weekDates.push(formatDateKey(d));
+  }
+  const days = ['一','二','三','四','五','六','日'];
+  let hasData = false, doneCount = 0, partialCount = 0, missCount = 0;
+  // 改用卡片式展示，显示具体内容
+  let cardsHtml = '';
+  weekDates.forEach((key, i) => {
+    const plan = appData.plans[key];
+    const d = parseDateKey(key);
+    let status = '', statusText = '—', statusColor = '#94a3b8';
+    let taskHtml = '';
+    if (plan && plan.todos && plan.todos.length > 0) {
+      hasData = true;
+      const total = plan.todos.length;
+      const doneNum = plan.todos.filter(t => t.done).length;
+      const pct = total ? doneNum / total : 0;
+      if (pct >= 0.8) { status = 'done'; statusText = '✓ 完成'; statusColor = 'var(--success)'; doneCount++; }
+      else if (pct >= 0.3) { status = 'partial'; statusText = '◐ 部分'; statusColor = 'var(--warning)'; partialCount++; }
+      else { status = 'miss'; statusText = '✗ 未完成'; statusColor = 'var(--danger)'; missCount++; }
+      taskHtml = plan.todos.map(t => `
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 0;">
+          <span>${t.done ? '✅' : '⬜'}</span>
+          <span style="${t.done?'text-decoration:line-through;color:var(--text-lighter);':''}">${escapeHtml(t.text)}</span>
+        </div>
+      `).join('');
+    } else if (plan && (plan.goal || plan.done)) {
+      hasData = true;
+      statusText = plan.done ? '✓ 完成' : '✗ 未完成';
+      statusColor = plan.done ? 'var(--success)' : 'var(--danger)';
+      if (plan.done) doneCount++; else missCount++;
+      taskHtml = `<div style="font-size:12px;color:var(--text-light);">${escapeHtml((plan.goal||plan.done).slice(0,50))}</div>`;
+    } else {
+      taskHtml = '<div style="font-size:12px;color:var(--text-lighter);">无计划</div>';
+    }
+    cardsHtml += `
+      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;border-left:4px solid ${statusColor};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-weight:600;font-size:13px;">周${days[i]} ${d.getMonth()+1}/${d.getDate()}</span>
+          <span style="font-size:12px;font-weight:600;color:${statusColor};">${statusText}</span>
+        </div>
+        ${taskHtml}
+      </div>
+    `;
+  });
+
+  let summaryHtml = '';
+  if (hasData) {
+    summaryHtml = `
+      <div style="margin:12px 0;padding:14px;background:linear-gradient(135deg,#eff6ff,#f8fafc);border-radius:10px;border:1px solid #dbeafe;">
+        <div style="font-weight:700;margin-bottom:10px;font-size:15px;color:var(--primary-dark);">📊 本周完成情况</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <div style="flex:1;text-align:center;background:white;border-radius:8px;padding:10px;">
+            <div style="font-size:22px;font-weight:700;color:var(--success);">${doneCount}</div>
+            <div style="font-size:11px;color:var(--text-light);">完成天</div>
+          </div>
+          <div style="flex:1;text-align:center;background:white;border-radius:8px;padding:10px;">
+            <div style="font-size:22px;font-weight:700;color:var(--warning);">${partialCount}</div>
+            <div style="font-size:11px;color:var(--text-light);">部分完成</div>
+          </div>
+          <div style="flex:1;text-align:center;background:white;border-radius:8px;padding:10px;">
+            <div style="font-size:22px;font-weight:700;color:var(--danger);">${missCount}</div>
+            <div style="font-size:11px;color:var(--text-light);">未完成</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:14px;">
+          完成率：<strong style="color:var(--primary);font-size:18px;">${Math.round(doneCount/7*100)}%</strong>
+        </div>
+      </div>
+      <div style="font-weight:600;margin:16px 0 8px;font-size:14px;">📋 每日详情</div>
+      ${cardsHtml}
+    `;
+  } else {
+    summaryHtml = '<div class="empty-state"><div class="icon">📊</div>本周暂无计划数据</div>';
+  }
+  document.getElementById('reviewContent').innerHTML = summaryHtml;
+}
+
+// ========== 月计划 ==========
+function getMonthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function changeMonth(delta) {
+  viewMonth.setMonth(viewMonth.getMonth() + delta);
+  renderMonthlyPanel();
+}
+
+function renderMonthlyPanel() {
+  const monthKey = getMonthKey(viewMonth);
+  const year = viewMonth.getFullYear();
+  const month = viewMonth.getMonth();
+
+  document.getElementById('currentMonthDisplay').textContent = `${year}年${month+1}月`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+  // 统计
+  let doneCount = 0, partialCount = 0, missCount = 0, noDataCount = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
+    const key = formatDateKey(d);
+    const plan = appData.plans[key];
+    const status = getPlanStatus(plan);
+    if (status === 'done') doneCount++;
+    else if (status === 'partial') partialCount++;
+    else if (status === 'miss') missCount++;
+    else noDataCount++;
+  }
+
+  // 顶部统计卡片
+  document.getElementById('monthStatGrid').innerHTML = `
+    <div class="month-stat-item"><div class="num">${doneCount}</div><div class="label">完成天</div></div>
+    <div class="month-stat-item"><div class="num">${partialCount}</div><div class="label">部分完成</div></div>
+    <div class="month-stat-item"><div class="num">${missCount}</div><div class="label">未完成</div></div>
+  `;
+
+  // 月历
+  const weekdays = ['日','一','二','三','四','五','六'];
+  let calendarHtml = weekdays.map(w => `<div class="calendar-weekday">${w}</div>`).join('');
+
+  for (let i = 0; i < startWeekday; i++) {
+    calendarHtml += '<div class="calendar-day empty"></div>';
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
+    const key = formatDateKey(d);
+    const plan = appData.plans[key];
+    const status = getPlanStatus(plan);
+    const isToday = isCurrentMonth && today.getDate() === day;
+    const dotClass = status === 'done' ? 'done' : status === 'partial' ? 'partial' : status === 'miss' ? 'miss' : '';
+    calendarHtml += `
+      <div class="calendar-day ${isToday ? 'today' : ''}" onclick="goToDate('${key}')">
+        <span class="day-num">${day}</span>
+        <span class="day-dot ${dotClass}"></span>
+      </div>
+    `;
+  }
+  document.getElementById('calendarGrid').innerHTML = calendarHtml;
+
+  // 月目标
+  const mp = appData.monthlyPlans[monthKey] || {};
+  document.getElementById('monthlyGoal').value = mp.goal || '';
+  document.getElementById('monthlySummary').value = mp.summary || '';
+
+  // 计算总目标完成进度（根据当月有数据的天数 / 当月总天数）
+  const validDays = doneCount + partialCount + missCount;
+  const monthProgress = daysInMonth > 0 ? Math.round(((doneCount + partialCount * 0.5) / daysInMonth) * 100) : 0;
+  document.getElementById('monthGoalPercent').textContent = monthProgress + '%';
+
+  // 分项目标
+  renderSubjectGoals(mp);
+}
+
+function getPlanStatus(plan) {
+  if (!plan) return 'none';
+  // 新版：根据 todos 完成率
+  if (plan.todos && plan.todos.length > 0) {
+    const total = plan.todos.length;
+    const doneNum = plan.todos.filter(t => t.done).length;
+    const pct = doneNum / total;
+    if (pct >= 0.8) return 'done';
+    if (pct >= 0.3) return 'partial';
+    return 'miss';
+  }
+  // 兼容旧数据
+  if (!plan.goal && !plan.done) return 'none';
+  if (plan.done && plan.goal) {
+    if (plan.done.length > plan.goal.length * 0.6) return 'done';
+    if (plan.done.length > 10) return 'partial';
+    return 'miss';
+  }
+  if (plan.done) return 'done';
+  return 'miss';
+}
+
+function goToDate(key) {
+  viewDate = key;
+  switchTab('plan');
+}
+
+function saveMonthlyData() {
+  const monthKey = getMonthKey(viewMonth);
+  if (!appData.monthlyPlans[monthKey]) appData.monthlyPlans[monthKey] = { subjects: [] };
+  appData.monthlyPlans[monthKey].goal = document.getElementById('monthlyGoal').value;
+  appData.monthlyPlans[monthKey].summary = document.getElementById('monthlySummary').value;
+  saveData(appData);
+  renderMonthlyPanel();
+}
+
+function renderSubjectGoals(mp) {
+  const subjects = mp.subjects || [];
+  const container = document.getElementById('subjectGoalsList');
+  if (subjects.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="icon" style="font-size:24px;">📚</div>点击右上角添加分项目标</div>';
+    return;
+  }
+  container.innerHTML = subjects.map((s, i) => {
+    const pct = Math.min(100, Math.round((s.current || 0) / (s.target || 1) * 100));
+    return `<div class="subject-goal-item">
+      <input type="text" placeholder="项目名称" value="${s.name || ''}" oninput="updateSubjectGoal(${i}, 'name', this.value)" style="min-width:60px;">
+      <input type="number" placeholder="目标" value="${s.target || ''}" oninput="updateSubjectGoal(${i}, 'target', this.value)" style="width:60px;text-align:center;">
+      <span style="color:var(--text-lighter);font-size:12px;">/</span>
+      <input type="number" placeholder="已完成" value="${s.current || ''}" oninput="updateSubjectGoal(${i}, 'current', this.value)" style="width:60px;text-align:center;">
+      <span class="pct">${pct}%</span>
+      <button class="btn btn-sm btn-danger" onclick="deleteSubjectGoal(${i})" style="padding:4px 8px;">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function addSubjectGoal() {
+  const monthKey = getMonthKey(viewMonth);
+  if (!appData.monthlyPlans[monthKey]) appData.monthlyPlans[monthKey] = { subjects: [] };
+  if (!appData.monthlyPlans[monthKey].subjects) appData.monthlyPlans[monthKey].subjects = [];
+  appData.monthlyPlans[monthKey].subjects.push({ name: '', target: '', current: '' });
+  saveData(appData);
+  renderMonthlyPanel();
+}
+
+function updateSubjectGoal(i, field, value) {
+  const monthKey = getMonthKey(viewMonth);
+  if (appData.monthlyPlans[monthKey] && appData.monthlyPlans[monthKey].subjects) {
+    if (field === 'target' || field === 'current') {
+      appData.monthlyPlans[monthKey].subjects[i][field] = value === '' ? '' : parseFloat(value) || 0;
+    } else {
+      appData.monthlyPlans[monthKey].subjects[i][field] = value;
+    }
+    saveData(appData);
+    renderSubjectGoals(appData.monthlyPlans[monthKey]);
+  }
+}
+
+function deleteSubjectGoal(i) {
+  const monthKey = getMonthKey(viewMonth);
+  if (appData.monthlyPlans[monthKey] && appData.monthlyPlans[monthKey].subjects) {
+    appData.monthlyPlans[monthKey].subjects.splice(i, 1);
+    saveData(appData);
+    renderMonthlyPanel();
+  }
+}
+
+// ========== 工具 ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+let saveTimer = null;
+function showSaveIndicator() {
+  const ind = document.getElementById('saveIndicator');
+  ind.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => ind.classList.remove('show'), 1000);
+}
+
+// ========== 语音输入 ==========
+let recognition = null;
+let currentVoiceTarget = null;
+
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.lang = 'zh-CN';
+  r.continuous = false;
+  r.interimResults = true;
+  return r;
+}
+
+function startVoiceInput(target) {
+  // 如果正在录音，先停止
+  if (recognition && currentVoiceTarget) {
+    stopVoiceInput();
+    return;
+  }
+  recognition = initSpeechRecognition();
+  if (!recognition) {
+    showToast('浏览器不支持语音输入，请用Chrome');
+    return;
+  }
+  currentVoiceTarget = target;
+  const btn = document.getElementById(target + 'VoiceBtn') || document.getElementById(target + 'VoiceBtn') ;
+  // 找按钮
+  const btnEl = document.querySelector(`#${target}VoiceBtn`) || (target === 'goal' ? document.getElementById('goalVoiceBtn') : null);
+  if (btnEl) btnEl.classList.add('recording');
+
+  let finalText = '';
+  recognition.onresult = (event) => {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalText += event.results[i][0].transcript;
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    // 实时显示在输入框
+    const input = document.getElementById('goalTodoInput');
+    if (input) input.value = finalText + interim;
+  };
+
+  recognition.onend = () => {
+    if (btnEl) btnEl.classList.remove('recording');
+    // 识别结束后，如果输入框有内容，自动添加为 todo
+    const input = document.getElementById('goalTodoInput');
+    if (input && input.value.trim()) {
+      // 按标点分割成多个任务
+      const tasks = input.value.trim().split(/[,，。；;\n]+/).map(s => s.trim()).filter(s => s);
+      tasks.forEach(t => addGoalTodo(t));
+      input.value = '';
+    }
+    recognition = null;
+    currentVoiceTarget = null;
+  };
+
+  recognition.onerror = (e) => {
+    if (btnEl) btnEl.classList.remove('recording');
+    showToast('语音识别失败：' + e.error);
+    recognition = null;
+    currentVoiceTarget = null;
+  };
+
+  recognition.start();
+  showToast('🎤 正在聆听...说完后自动添加');
+}
+
+function stopVoiceInput() {
+  if (recognition) {
+    recognition.stop();
+  }
+}
+
+// ========== 云同步（GitHub 仓库存储）==========
+const GITHUB_OWNER = 'Youky11';
+const GITHUB_REPO = 'study-planner';
+const GITHUB_SYNC_FILE = 'sync-data.json';
+let GITHUB_TOKEN = localStorage.getItem('gh_token') || '';
+
+function ensureToken() {
+  if (GITHUB_TOKEN) return true;
+  const t = prompt('首次同步需要输入 GitHub Token（用于云端存储，只需输入一次）：\n\n获取方式：\n1. 打开 github.com/settings/tokens/new\n2. 勾选 repo 权限\n3. 生成后复制粘贴到这里');
+  if (t && t.trim()) {
+    GITHUB_TOKEN = t.trim();
+    localStorage.setItem('gh_token', GITHUB_TOKEN);
+    return true;
+  }
+  return false;
+}
+const SYNC_KEY = 'study2024planner';
+
+async function getCloudDataSHA() {
+  const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_SYNC_FILE}`, {
+    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+  });
+  if (resp.ok) {
+    const data = await resp.json();
+    return data.sha;
+  }
+  return null;
+}
+
+async function cloudSync() {
+  const statusEl = document.getElementById('syncStatus');
+  
+  if (!ensureToken()) {
+    statusEl.textContent = '✗ 需要Token才能同步';
+    statusEl.style.color = '#ef4444';
+    showToast('请输入 GitHub Token');
+    return;
+  }
+  
+  statusEl.textContent = '同步中...';
+  statusEl.style.color = '#f59e0b';
+
+  try {
+    // 1. 获取云端文件 SHA + 内容
+    const cloudResp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_SYNC_FILE}`, {
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+    });
+    let cloudData = {};
+    let fileSHA = null;
+    if (cloudResp.ok) {
+      const cloudFile = await cloudResp.json();
+      fileSHA = cloudFile.sha;
+      const content = atob(cloudFile.content.replace(/\n/g, ''));
+      cloudData = JSON.parse(content);
+      delete cloudData._lastSync;
+    }
+
+    // 2. 合并：云端和本地数据取最新的
+    const localData = JSON.parse(JSON.stringify(appData));
+    const merged = mergeData(localData, cloudData);
+
+    // 3. 更新本地
+    appData = merged;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+
+    // 4. 推送合并后的数据到云端
+    const uploadData = JSON.parse(JSON.stringify(appData));
+    uploadData._lastSync = Date.now();
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(uploadData))));
+    await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_SYNC_FILE}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'sync ' + new Date().toISOString(),
+        content: encoded,
+        sha: fileSHA
+      })
+    });
+
+    // 5. 刷新界面
+    const activeTab = document.querySelector('.nav-item.active').dataset.tab;
+    switchTab(activeTab);
+
+    statusEl.textContent = '✓ 同步成功 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+    statusEl.style.color = '#10b981';
+    showToast('☁️ 同步成功！');
+  } catch(e) {
+    statusEl.textContent = '✗ 同步失败，点击重试';
+    statusEl.style.color = '#ef4444';
+    showToast('同步失败，请检查网络');
+    console.error(e);
+  }
+}
+
+function mergeData(local, cloud) {
+  // 简单合并策略：对于 plans/english/politics/monthlyPlans 用对象合并
+  // 如果同一天的数据冲突，用内容更长的（信息更丰富的）
+  const result = JSON.parse(JSON.stringify(local));
+
+  // 合并 plans
+  for (const date in cloud.plans) {
+    if (!result.plans[date] || isPlanRicher(cloud.plans[date], result.plans[date])) {
+      result.plans[date] = cloud.plans[date];
+    }
+  }
+
+  // 合并 english
+  for (const date in cloud.english) {
+    if (!result.english[date] || JSON.stringify(cloud.english[date]).length > JSON.stringify(result.english[date]).length) {
+      result.english[date] = cloud.english[date];
+    }
+  }
+
+  // 合并 politics
+  for (const date in cloud.politics) {
+    if (!result.politics[date] || JSON.stringify(cloud.politics[date]).length > JSON.stringify(result.politics[date]).length) {
+      result.politics[date] = cloud.politics[date];
+    }
+  }
+
+  // 合并 monthlyPlans
+  for (const month in cloud.monthlyPlans) {
+    if (!result.monthlyPlans[month] || JSON.stringify(cloud.monthlyPlans[month]).length > JSON.stringify(result.monthlyPlans[month]).length) {
+      result.monthlyPlans[month] = cloud.monthlyPlans[month];
+    }
+  }
+
+  // 合并 courses：取章节更多的
+  if (cloud.courses && cloud.courses.length > result.courses.length) {
+    result.courses = cloud.courses;
+  } else if (cloud.courses) {
+    result.courses.forEach((course, i) => {
+      if (cloud.courses[i] && cloud.courses[i].chapters && cloud.courses[i].chapters.length > (course.chapters?.length || 0)) {
+        result.courses[i] = cloud.courses[i];
+      }
+    });
+  }
+
+  // newsIndex 取较大的
+  if ((cloud.newsIndex || 0) > (result.newsIndex || 0)) {
+    result.newsIndex = cloud.newsIndex;
+  }
+
+  return result;
+}
+
+function isPlanRicher(a, b) {
+  // 优先比较 todos 数量
+  const todoA = (a.todos || []).length;
+  const todoB = (b.todos || []).length;
+  if (todoA !== todoB) return todoA > todoB;
+  // 再比较文本长度
+  const lenA = (a.goal||'').length + (a.done||'').length + (a.review||'').length;
+  const lenB = (b.goal||'').length + (b.done||'').length + (b.review||'').length;
+  return lenA > lenB;
+}
+
+// 自动同步：每次打开时拉取一次
+setTimeout(() => { cloudSync(); }, 2000);
+// 每5分钟自动同步一次
+setInterval(() => { cloudSync(); }, 5 * 60 * 1000);
+
+// ========== 初始化 ==========
+renderHeader();
+renderPlanPanel();
+
+setInterval(() => {
+  if (formatDateKey(new Date()) !== getTodayKey()) location.reload();
+}, 60000);
+</script>
+</body>
+</html>
