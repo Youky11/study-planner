@@ -81,6 +81,32 @@ body {
   margin-top: 6px;
 }
 
+.sidebar-countdown {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(239,68,68,0.15);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid rgba(239,68,68,0.25);
+}
+.countdown-label {
+  font-size: 9px;
+  color: #fca5a5;
+  letter-spacing: 0.5px;
+}
+.countdown-days {
+  font-size: 28px;
+  font-weight: 800;
+  color: #f87171;
+  line-height: 1;
+  margin: 4px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.countdown-desc {
+  font-size: 9px;
+  color: #fca5a5;
+}
+
 .nav-list {
   flex: 1;
   padding: 8px 0;
@@ -799,6 +825,11 @@ textarea { min-height: 70px; }
     <div class="sidebar-title">学习计划台</div>
     <div class="sidebar-date" id="sidebarDate"></div>
     <div class="sidebar-week" id="sidebarWeek"></div>
+    <div class="sidebar-countdown" id="sidebarCountdown">
+      <div class="countdown-label">距2027考研</div>
+      <div class="countdown-days" id="countdownDays">--</div>
+      <div class="countdown-desc">天</div>
+    </div>
   </div>
   <div class="nav-list">
     <div class="nav-item active" data-tab="plan" onclick="switchTab('plan')">
@@ -1208,6 +1239,26 @@ function renderHeader() {
   document.getElementById('sidebarDate').textContent =
     `${d.getMonth()+1}月${d.getDate()}日 ${getDayOfWeek(d)}`;
   document.getElementById('sidebarWeek').textContent = `第${getWeekNumber(d)}周`;
+  updateCountdown(d);
+}
+
+// ========== 考研倒计时 ==========
+const EXAM_DATE = new Date('2026-12-26T08:30:00+08:00');
+
+function updateCountdown(today) {
+  const diff = EXAM_DATE.getTime() - today.getTime();
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  const el = document.getElementById('countdownDays');
+  if (days > 0) {
+    el.textContent = days;
+    el.style.color = '#f87171';
+  } else if (days === 0) {
+    el.textContent = '今';
+    el.style.color = '#fbbf24';
+  } else {
+    el.textContent = '已过';
+    el.style.color = '#94a3b8';
+  }
 }
 
 // ========== 日计划 ==========
