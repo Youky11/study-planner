@@ -2278,17 +2278,20 @@ function ensureToken() {
   }
   return false;
 }
-const SYNC_KEY = 'study2024planner';
 
-async function getCloudDataSHA() {
-  const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_SYNC_FILE}`, {
-    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-  });
-  if (resp.ok) {
-    const data = await resp.json();
-    return data.sha;
-  }
-  return null;
+// 安全的 UTF-8 base64 编码
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  const bin = String.fromCharCode(...bytes);
+  return btoa(bin);
+}
+
+// 安全的 UTF-8 base64 解码
+function base64ToUtf8(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 async function cloudSync() {
@@ -2314,7 +2317,7 @@ async function cloudSync() {
     if (cloudResp.ok) {
       const cloudFile = await cloudResp.json();
       fileSHA = cloudFile.sha;
-      const content = atob(cloudFile.content.replace(/\n/g, ''));
+      const content = base64ToUtf8(cloudFile.content.replace(/\n/g, ''));
       cloudData = JSON.parse(content);
       delete cloudData._lastSync;
     }
@@ -2330,7 +2333,7 @@ async function cloudSync() {
     // 4. 推送合并后的数据到云端
     const uploadData = JSON.parse(JSON.stringify(appData));
     uploadData._lastSync = Date.now();
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(uploadData))));
+    const encoded = utf8ToBase64(JSON.stringify(uploadData));
     await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_SYNC_FILE}`, {
       method: 'PUT',
       headers: {
